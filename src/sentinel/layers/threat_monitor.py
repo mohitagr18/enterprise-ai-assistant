@@ -174,7 +174,10 @@ async def monitor_threats(
             return LayerResult(
                 layer_name=layer_name,
                 passed=False,
-                reason=f"Threat threshold breached: {', '.join(breached)}.",
+                reason=(
+                    f"Threat threshold breached: Temporary lockout active due to suspicious activity history (breached: {', '.join(breached)}). "
+                    "Please wait for your cooldown window to expire or contact security administration."
+                ),
                 details={
                     "flagged": True,
                     "breached_metrics": breached,
@@ -203,5 +206,5 @@ async def monitor_threats(
         return LayerResult(
             layer_name=layer_name,
             passed=False,
-            reason=f"Threat verification failed closed: {str(e)}",
+            reason=f"Request rejected: Threat verification failed closed due to system error: {str(e)}",
         )

@@ -84,7 +84,10 @@ async def moderate_content(
             return LayerResult(
                 layer_name=layer_name,
                 passed=False,
-                reason=f"Content blocked by safety policy ({direction}).",
+                reason=(
+                    f"Request rejected: Content blocked by safety policy ({direction}). "
+                    "This input/output violates our community guidelines regarding safety and harmful activities."
+                ),
                 details={
                     "direction": direction,
                     "flagged_categories": flagged_categories,
@@ -104,7 +107,10 @@ async def moderate_content(
         return LayerResult(
             layer_name=layer_name,
             passed=False,
-            reason=f"Safety verification failed closed due to network/service outage ({direction}).",
+            reason=(
+                f"Request rejected: Safety verification failed closed due to network/service outage ({direction}). "
+                "Under our safety policy, all content must be moderated before processing."
+            ),
             details={
                 "direction": direction,
                 "error": str(e),

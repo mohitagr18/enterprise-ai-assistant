@@ -98,7 +98,11 @@ async def check_semantic_safety(text: str, settings: Settings) -> LayerResult:
             return LayerResult(
                 layer_name=layer_name,
                 passed=False,
-                reason=f"Semantic security check blocked by scanners: {', '.join(blocked_scanners)}.",
+                reason=(
+                    f"Request rejected: Semantic security check blocked by scanners: {', '.join(blocked_scanners)}. "
+                    "This input references restricted policy topics (e.g., weapons manufacturing, illegal drugs) "
+                    "or prompt injection patterns."
+                ),
                 details={"scores": details, "blocked_scanners": blocked_scanners},
             )
 
@@ -117,7 +121,10 @@ async def check_semantic_safety(text: str, settings: Settings) -> LayerResult:
             return LayerResult(
                 layer_name=layer_name,
                 passed=False,
-                reason=f"Semantic safety check failed closed: scanner execution timed out after {timeout}s.",
+                reason=(
+                    "Request rejected: Semantic safety check failed closed. "
+                    f"Scanner execution timed out after {timeout}s under our fail-closed security policy."
+                ),
             )
         return LayerResult(layer_name=layer_name, passed=True)
     except Exception as e:

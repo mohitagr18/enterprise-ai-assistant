@@ -14,6 +14,14 @@ To simplify the explanation of how requests flow, how RAG document security clea
 
 ---
 
+## 📖 Security Analogy & Interactive Testing Playbook
+
+For a comprehensive explanation of our multi-layered defense system using a **secured corporate building analogy**, along with detailed step-by-step instructions (including exact `curl` commands and UI actions) to test each security scenario:
+
+👉 **[Sentinel AI Testing Playbook & Analogy Guide](TESTING_PLAYBOOK.md)**
+
+---
+
 ## 🛠️ Technical Stack & Choices
 
 * **Backend Engine:** [FastAPI](https://fastapi.tiangolo.com/) (Asynchronous, type-safe REST framework).
@@ -102,18 +110,18 @@ To test the role-based access control (RBAC), the application pre-populates thre
 
 Sentinel AI secures the assistant lifecycle through twelve successive layers:
 
-1. **Input Validator (`input_validator.py`)**: First line of defense. Rejects null bytes, oversized payloads, and basic command keywords.
-2. **Semantic Guard (`semantic_guard.py`)**: Uses machine-learning classifiers to scan for hidden prompt injections and toxic queries.
-3. **System Prompt Hardener (`system_prompt.py`)**: Wraps context in strict instructions, preventing instruction overrides and system leaks.
-4. **Input Restructurer (`input_restructurer.py`)**: Truncates inputs to token budgets, ensuring context window safety.
-5. **Token Budget (`token_budget.py`)**: Enforces daily token limits based on user clearance levels (tracked in Redis).
-6. **Content Moderator (`content_moderator.py`)**: Moderates inputs and output text against OpenAI safety categories.
-7. **Context Isolator (`context_isolator.py`)**: Filters RAG files by clearance tier; wraps documents in XML boundaries.
-8. **Output Validator (`output_validator.py`)**: Enforces JSON response formats and intercepts raw Python traceback leakages.
-9. **Audit Logger (`audit_logger.py`)**: Logs structural JSON lifecycle audits to console and `logs/audit.jsonl` unconditionally.
-10. **Agent Identity (`agent_identity.py`)**: Blocks requests that exceed the agent's pre-approved scope and actions.
-11. **Human Gate (`human_gate.py`)**: Intercepts high-stakes actions, generating a token in Redis requiring admin approval.
-12. **Threat Monitor (`threat_monitor.py`)**: Accumulates individual blocks in a rolling window, locking out abusive users.
+1. **Input Validator (`input_validator.py`)** — *First Line of Defense*: Instantly blocks syntactically malformed requests, null-byte injections, oversized payloads, and matches input against known direct prompt injection signatures.
+2. **Semantic Guard (`semantic_guard.py`)** — *AI-Based Context Scanner*: Uses local ONNX model scanners (`llm-guard`) to check for complex semantic prompt injections and banned category violations (e.g. weapons manufacturing). *Note: Includes an asynchronous execution timeout (default 10s) that fails closed to prevent network/initialization delays from hanging the client connection.*
+3. **System Prompt Hardener (`system_prompt.py`)** — *Prompt Isolation*: Wraps retrieved knowledge base documents in strict XML delimiters and appends robust system guidelines to prevent models from leaking instructions or obeying user overrides.
+4. **Input Restructurer (`input_restructurer.py`)** — *Context Budgeting*: Sanitizes user text, trims whitespace, and truncates inputs to ensure they fit safely within LLM context windows without triggering overflow errors.
+5. **Token Budget (`token_budget.py`)** — *Cost & Quota Protection*: Tracks real-time token consumption against role-based daily quotas stored in Redis to stop cost-abuse spikes.
+6. **Content Moderator (`content_moderator.py`)** — *Harm Filter*: Utilizes the OpenAI Moderation API on both user inputs and assistant outputs to block text containing violent, hateful, self-harm, or sexually explicit concepts.
+7. **Context Isolator (`context_isolator.py`)** — *Role-Based Document Isolation*: Filters retrieved search documents by the user's role authorization (e.g. blocking standard employees from accessing restricted security logs) before they reach the prompt builder.
+8. **Output Validator (`output_validator.py`)** — *Data Leakage Shield*: Enforces valid JSON response schemas and catches raw programming code/tracebacks to prevent accidental backend infrastructure exposure.
+9. **Audit Logger (`audit_logger.py`)** — *Tamper-Evident Records*: Write JSON logs of request metadata, hashes, execution speed, and layer block history to `logs/audit.jsonl` unconditionally.
+10. **Agent Identity (`agent_identity.py`)** — *Clearance Limits*: Inspects the assistant's pre-approved action permissions to prevent it from executing unauthorized actions on behalf of standard users.
+11. **Human Gate (`human_gate.py`)** — *High-Stakes Verification*: Intercepts dangerous actions (e.g. data deletion) and holds them in Redis for explicit review and manual approval by a security administrator.
+12. **Threat Monitor (`threat_monitor.py`)** — *Behavioral Lockout*: Keeps track of security blocks in a rolling 5-minute window. Flagged accounts are temporarily locked out to prevent brute-force security probing.
 
 ---
 
