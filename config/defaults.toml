@@ -1,0 +1,241 @@
+# =============================================================
+# Sentinel AI — Policy & Behavioral Defaults
+# =============================================================
+#
+# PURPOSE: This file is committed to version control.
+# Changes here are code-reviewed, diffable, and auditable.
+# This is intentional: security policy (injection patterns,
+# banned topics, privilege ceilings, approval gates) should
+# live where your team can review them — not buried in an
+# environment variable that nobody can see.
+#
+# OVERRIDE RULE: Any value here can be overridden by a
+# matching variable in .env (or a real environment variable).
+# The priority chain is:
+#   environment variables  (highest — CI/CD, containers)
+#   > .env file            (deployment-specific secrets)
+#   > this file            (organizational policy)
+#   > code defaults        (lowest — last resort)
+#
+# KEY NAMES: Use lowercase with underscores. They map to the
+# uppercase field names in config.py (case-insensitive).
+# =============================================================
+
+
+# -----------------------------------------------------------------
+# OpenAI — model selection and call behaviour
+# -----------------------------------------------------------------
+
+# Chat model for completions. Change here to upgrade the whole deployment.
+# Examples: gpt-4o, gpt-4o-mini, gpt-4-turbo
+openai_chat_model = "gpt-4o-mini"
+
+# Embedding model for the knowledge store.
+openai_embedding_model = "text-embedding-3-small"
+
+# Maximum tokens the model may generate per response.
+openai_max_response_tokens = 2048
+
+# Seconds before an OpenAI API call is considered timed out.
+openai_timeout_seconds = 30
+
+
+# -----------------------------------------------------------------
+# ChromaDB — knowledge store identity
+# -----------------------------------------------------------------
+
+# Collection name inside ChromaDB. Renaming this creates a new empty store.
+chromadb_collection_name = "sentinel_knowledge"
+
+
+# -----------------------------------------------------------------
+# JWT — session policy
+# -----------------------------------------------------------------
+
+# Access token lifetime in seconds. 3600 = 1 hour.
+jwt_access_token_expire_seconds = 3600
+
+# Refresh token lifetime in seconds. 604800 = 7 days.
+jwt_refresh_token_expire_seconds = 604800
+
+
+# -----------------------------------------------------------------
+# Layer 1 — Input Validator
+# Changing these tightens or loosens the first line of defence.
+# -----------------------------------------------------------------
+
+# Hard character limit for any single message.
+input_max_length = 10000
+
+# Minimum length — rejects empty or whitespace-only messages.
+input_min_length = 1
+
+# Always block messages containing null bytes (\x00).
+input_block_null_bytes = true
+
+# Regex patterns matched case-insensitively against raw user input.
+# A match causes an immediate rejection before any ML processing.
+# Add patterns specific to your org's known attack vocabulary.
+input_injection_patterns = [
+  "ignore previous instructions",
+  "ignore all prior",
+  "disregard above",
+  "you are now",
+  "act as if",
+  "pretend you are",
+  "system prompt",
+  "reveal your instructions",
+  "override safety",
+]
+
+
+# -----------------------------------------------------------------
+# Layer 2 — Semantic Guard
+# ML-based prompt injection and toxicity detection.
+# -----------------------------------------------------------------
+
+# Detection threshold (0.0–1.0). Lower = more sensitive.
+# 0.5 catches clear attacks. Lower values may increase false positives.
+semantic_guard_threshold = 0.5
+
+# Whether to block the request if llm-guard itself throws an error.
+# true = fail closed (safe). false = fail open (dangerous). Always true in prod.
+semantic_guard_fail_closed = true
+
+# Topics blocked regardless of phrasing. Matched by the semantic scanner.
+semantic_guard_banned_topics = [
+  "weapons manufacturing",
+  "illegal drugs synthesis",
+  "exploit development",
+  "malware creation",
+]
+
+
+# -----------------------------------------------------------------
+# Layer 4 — Input Restructurer
+# Token budget for the input side of the context window.
+# -----------------------------------------------------------------
+
+# Maximum tokens allowed in user input before visible truncation.
+input_max_tokens = 4096
+
+# tiktoken encoding. Must match the chat model:
+#   gpt-4o / gpt-4o-mini → o200k_base
+#   gpt-3.5-turbo / gpt-4 → cl100k_base
+tiktoken_encoding = "o200k_base"
+
+
+# -----------------------------------------------------------------
+# Layer 5 — Token Budget
+# Daily token allowances by role. Resets at midnight UTC.
+# These are organizational spend policy — review before changing.
+# -----------------------------------------------------------------
+
+token_budget_standard   = 100_000
+token_budget_power_user = 500_000
+token_budget_admin      = 1_000_000
+
+
+# -----------------------------------------------------------------
+# Layer 6 — Content Moderator
+# -----------------------------------------------------------------
+
+# Which moderation model to call. Rarely needs changing.
+moderation_model = "omni-moderation-latest"
+
+
+# -----------------------------------------------------------------
+# Layer 7 — Context Isolator
+# Document classification hierarchy and access control.
+# -----------------------------------------------------------------
+
+# Ordered from least to most restrictive. Do not reorder without
+# reviewing all places that compare classification levels.
+classification_levels = ["public", "internal", "confidential", "restricted"]
+
+# Roles that may access documents at the 'restricted' level.
+restricted_access_roles = ["admin", "security_officer"]
+
+
+# -----------------------------------------------------------------
+# Layer 10 — Agent Identity
+# What this agent is, what it may access, and its privilege ceiling.
+# These constraints apply even to admin users.
+# -----------------------------------------------------------------
+
+agent_name = "Sentinel AI"
+agent_id   = "sentinel-prod-001"
+
+# Knowledge sources this agent is authorised to query.
+agent_allowed_sources = [
+  "internal_docs",
+  "company_wiki",
+  "hr_policies",
+]
+
+# Actions this agent is authorised to perform.
+agent_allowed_actions = [
+  "answer_question",
+  "summarize_document",
+  "search_knowledge_base",
+]
+
+# Maximum privilege level this agent operates at.
+# Even an admin user cannot make this agent exceed its own ceiling.
+# Values: standard | power_user | admin
+agent_max_privilege = "power_user"
+
+
+# -----------------------------------------------------------------
+# Layer 11 — Human Gate
+# Actions that require explicit human approval before execution.
+# Adding a category here is a policy decision — it should be PR'd.
+# -----------------------------------------------------------------
+
+human_gate_actions = [
+  "data_deletion",
+  "policy_change",
+  "financial_approval",
+  "access_grant",
+  "system_configuration",
+]
+
+# Approval tokens expire after this many seconds. Expired = rejected.
+human_gate_token_ttl_seconds = 3600
+
+
+# -----------------------------------------------------------------
+# Layer 12 — Threat Monitor
+# Thresholds for the rolling-window behavioural analytics layer.
+# These are tuning parameters. Lower thresholds = earlier detection
+# but more false positives. Raise them only with evidence.
+# -----------------------------------------------------------------
+
+# Rolling window width in seconds.
+threat_monitor_window_seconds = 300
+
+# Max layer blocks before flagging the user session as suspicious.
+threat_monitor_max_blocks = 5
+
+# Max injection pattern matches in the window.
+threat_monitor_max_injection_matches = 3
+
+# Max semantic guard triggers in the window.
+threat_monitor_max_semantic_triggers = 3
+
+# Max token budget exhaustion events in the window.
+threat_monitor_max_budget_hits = 10
+
+# Rate limit (req/min) applied to flagged sessions.
+threat_monitor_reduced_rate_limit = 5
+
+
+# -----------------------------------------------------------------
+# Rate Limiting — applied globally via middleware
+# -----------------------------------------------------------------
+
+# Normal per-user request cap.
+rate_limit_requests_per_minute = 30
+
+# Sliding window width for rate limit calculation.
+rate_limit_window_seconds = 60
