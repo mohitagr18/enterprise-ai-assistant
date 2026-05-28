@@ -112,7 +112,7 @@ class Settings(BaseSettings):
     APP_HOST: str = Field(default="127.0.0.1")
     APP_PORT: int = Field(default=8000, ge=1, le=65535)
     APP_DEBUG: bool = Field(default=False)
-    CORS_ALLOWED_ORIGINS: list[str] = Field(default=["http://localhost:3000"])
+    CORS_ALLOWED_ORIGINS: str | list[str] = Field(default=["http://localhost:3000"])
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field(default="INFO")
     CONTENT_MODERATION_ENABLED: bool = Field(default=True)
 
@@ -142,7 +142,7 @@ class Settings(BaseSettings):
     INPUT_MAX_LENGTH: int = Field(default=10000, ge=1)
     INPUT_MIN_LENGTH: int = Field(default=1, ge=1)
     INPUT_BLOCK_NULL_BYTES: bool = Field(default=True)
-    INPUT_INJECTION_PATTERNS: list[str] = Field(
+    INPUT_INJECTION_PATTERNS: str | list[str] = Field(
         default=[
             "ignore previous instructions",
             "ignore all prior",
@@ -159,7 +159,7 @@ class Settings(BaseSettings):
     # Layer 2 — Semantic Guard
     SEMANTIC_GUARD_THRESHOLD: float = Field(default=0.5, ge=0.0, le=1.0)
     SEMANTIC_GUARD_FAIL_CLOSED: bool = Field(default=True)
-    SEMANTIC_GUARD_BANNED_TOPICS: list[str] = Field(
+    SEMANTIC_GUARD_BANNED_TOPICS: str | list[str] = Field(
         default=["weapons manufacturing", "illegal drugs synthesis",
                  "exploit development", "malware creation"]
     )
@@ -177,18 +177,18 @@ class Settings(BaseSettings):
     MODERATION_MODEL: str = Field(default="omni-moderation-latest")
 
     # Layer 7 — Context Isolator
-    CLASSIFICATION_LEVELS: list[str] = Field(
+    CLASSIFICATION_LEVELS: str | list[str] = Field(
         default=["public", "internal", "confidential", "restricted"]
     )
-    RESTRICTED_ACCESS_ROLES: list[str] = Field(default=["admin", "security_officer"])
+    RESTRICTED_ACCESS_ROLES: str | list[str] = Field(default=["admin", "security_officer"])
 
     # Layer 10 — Agent Identity
     AGENT_NAME: str = Field(default="Sentinel AI")
     AGENT_ID: str = Field(default="sentinel-dev-001")
-    AGENT_ALLOWED_SOURCES: list[str] = Field(
+    AGENT_ALLOWED_SOURCES: str | list[str] = Field(
         default=["internal_docs", "company_wiki", "hr_policies"]
     )
-    AGENT_ALLOWED_ACTIONS: list[str] = Field(
+    AGENT_ALLOWED_ACTIONS: str | list[str] = Field(
         default=["answer_question", "summarize_document", "search_knowledge_base"]
     )
     AGENT_MAX_PRIVILEGE: Literal["standard", "power_user", "admin"] = Field(
@@ -196,7 +196,7 @@ class Settings(BaseSettings):
     )
 
     # Layer 11 — Human Gate
-    HUMAN_GATE_ACTIONS: list[str] = Field(
+    HUMAN_GATE_ACTIONS: str | list[str] = Field(
         default=["data_deletion", "policy_change", "financial_approval",
                  "access_grant", "system_configuration"]
     )

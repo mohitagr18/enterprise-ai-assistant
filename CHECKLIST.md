@@ -110,20 +110,20 @@ uv run pytest tests/test_auth.py tests/test_rate_limiter.py -v
 > **Goal:** The first four defensive layers that require no external API calls.
 > These are fast, cheap checks that run before any expensive processing.
 
-- [ ] 4.1 Create `src/sentinel/layers/input_validator.py` — Layer 1
-- [ ] 4.2 Create `tests/test_input_validator.py` — happy path, injection pattern, boundary length
-- [ ] 4.3 Create `src/sentinel/layers/semantic_guard.py` — Layer 2 (llm-guard, fail-closed)
-- [ ] 4.4 Create `tests/test_semantic_guard.py` — happy path, disguised injection, exception fail-closed
-- [ ] 4.5 Create `src/sentinel/layers/system_prompt.py` — Layer 3
-- [ ] 4.6 Create `tests/test_system_prompt.py` — happy path, security phrases present, empty docs
-- [ ] 4.7 Create `src/sentinel/layers/input_restructurer.py` — Layer 4 (tiktoken)
-- [ ] 4.8 Create `tests/test_input_restructurer.py` — happy path, token bomb, boundary value
+- [x] 4.1 Create `src/sentinel/layers/input_validator.py` — Layer 1
+- [x] 4.2 Create `tests/test_input_validator.py` — happy path, injection pattern, boundary length
+- [x] 4.3 Create `src/sentinel/layers/semantic_guard.py` — Layer 2 (llm-guard, fail-closed)
+- [x] 4.4 Create `tests/test_semantic_guard.py` — happy path, disguised injection, exception fail-closed
+- [x] 4.5 Create `src/sentinel/layers/system_prompt.py` — Layer 3
+- [x] 4.6 Create `tests/test_system_prompt.py` — happy path, security phrases present, empty docs
+- [x] 4.7 Create `src/sentinel/layers/input_restructurer.py` — Layer 4 (tiktoken)
+- [x] 4.8 Create `tests/test_input_restructurer.py` — happy path, token bomb, boundary value
 
 ### VERIFY Phase 4:
 ```bash
 uv run pytest tests/test_input_validator.py tests/test_semantic_guard.py tests/test_system_prompt.py tests/test_input_restructurer.py -v
 ```
-- [ ] 4.V All tests pass
+- [x] 4.V All tests pass
 
 ---
 
@@ -291,6 +291,7 @@ grep -r "sk-" src/ --include="*.py" | grep -v "example" | grep -v ".env"
 | 2026-05-27 20:09 | claude-sonnet-4-6 | completed | Phase 1 | uv sync OK. config.py, dependencies.py created. Fakeredis fallback verified. All items [x]. |
 | 2026-05-27 20:39 | gemini-3.5-flash | completed | Phase 2 | Created LayerResult, structlog setup, requests/responses/auth models, audit_logger, conftest.py. Verified imports. |
 | 2026-05-27 20:41 | gemini-3.5-flash | completed | Phase 3 | Argon2id hashing, JWT handler, auth routes, sliding-window rate limiter, and security headers implemented. Fixed pytest-asyncio event-loop sharing and ZSET concurrency collisions. |
+| 2026-05-27 21:09 | gemini-3.5-flash | completed | Phase 4 | Completed Layers 1-4: Input Validator, Semantic Guard, System Prompt Hardener, and Input Restructurer. Configured list validation in config.py using Union types (str | list[str]) to prevent Pydantic JSON parsing errors from environment variables. |
 | | | | | |
 
 ---
