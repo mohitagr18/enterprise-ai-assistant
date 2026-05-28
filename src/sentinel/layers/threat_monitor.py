@@ -57,21 +57,33 @@ async def monitor_threats(
     window = settings.THREAT_MONITOR_WINDOW_SECONDS
     clear_before = now - window
 
+    # 1. Check if the user is already flagged/locked out in the active rolling window
+    try:
+        is_flagged = await redis_conn.exists(_get_flagged_key(user_id))
+        if is_flagged:
+            logger.warning("threat_monitor_blocking_flagged_user", user_id=user_id)
+            return LayerResult(
+                layer_name=layer_name,
+                passed=False,
+                reason="Threat threshold breached: Temporary lockout active due to suspicious activity history.",
+                details={
+                    "flagged": True,
+                    "action_taken": "lockout",
+                },
+            )
+    except Exception as e:
+        logger.error("threat_monitor_redis_flag_check_failed", error=str(e))
+
     # Check if the current request has any layer blocks
     failed_layers = [r for r in layer_results if not r.passed]
 
-    # If nothing failed, check if they are already flagged (to log or propagate status)
+    # If nothing failed, they pass threat monitoring for this request
     if not failed_layers:
-        try:
-            is_flagged = await redis_conn.exists(_get_flagged_key(user_id))
-            return LayerResult(
-                layer_name=layer_name,
-                passed=True,
-                details={"flagged": bool(is_flagged)},
-            )
-        except Exception as e:
-            logger.error("threat_monitor_redis_check_failed", error=str(e))
-            return LayerResult(layer_name=layer_name, passed=True)
+        return LayerResult(
+            layer_name=layer_name,
+            passed=True,
+            details={"flagged": False},
+        )
 
     try:
         # We have failures! Record them in Redis.

@@ -174,17 +174,17 @@ uv run pytest tests/test_agent_identity.py tests/test_human_gate.py tests/test_t
 
 > **Goal:** Document ingestion with security checks and retrieval that feeds Layer 7.
 
-- [/] 7.1 Create `src/sentinel/knowledge/store.py` — ChromaDB collection management
-- [/] 7.2 Create `src/sentinel/knowledge/ingestion.py` — MIME validation, magic bytes, content mod
-- [/] 7.3 Create `src/sentinel/knowledge/retrieval.py` — semantic search feeding context isolator
-- [/] 7.4 Create `src/sentinel/services/llm_client.py` — async OpenAI wrapper with retry/timeout
+- [x] 7.1 Create `src/sentinel/knowledge/store.py` — ChromaDB collection management
+- [x] 7.2 Create `src/sentinel/knowledge/ingestion.py` — MIME validation, magic bytes, content mod
+- [x] 7.3 Create `src/sentinel/knowledge/retrieval.py` — semantic search feeding context isolator
+- [x] 7.4 Create `src/sentinel/services/llm_client.py` — async OpenAI wrapper with retry/timeout
 
 ### VERIFY Phase 7:
 ```bash
 uv run python -c "from sentinel.knowledge.store import KnowledgeStore; print('Store OK')"
 uv run python -c "from sentinel.services.llm_client import LLMClient; print('Client OK')"
 ```
-- [ ] 7.V Verification commands pass
+- [x] 7.V Verification commands pass
 
 ---
 
@@ -193,14 +193,14 @@ uv run python -c "from sentinel.services.llm_client import LLMClient; print('Cli
 > **Goal:** The central service that wires all 12 layers in the correct sequence.
 > This is the most critical file in the codebase.
 
-- [ ] 8.1 Create `src/sentinel/services/pipeline.py` — orchestrator per PLAN.md Section 4
-- [ ] 8.2 Create `src/sentinel/layers/__init__.py` — export all layer functions
+- [x] 8.1 Create `src/sentinel/services/pipeline.py` — orchestrator per PLAN.md Section 4
+- [x] 8.2 Create `src/sentinel/layers/__init__.py` — export all layer functions
 
 ### VERIFY Phase 8:
 ```bash
 uv run python -c "from sentinel.services.pipeline import SecurityPipeline; print('Pipeline OK')"
 ```
-- [ ] 8.V Verification command passes
+- [x] 8.V Verification command passes
 
 ---
 
@@ -208,11 +208,11 @@ uv run python -c "from sentinel.services.pipeline import SecurityPipeline; print
 
 > **Goal:** All HTTP endpoints wired up. The app starts and responds to requests.
 
-- [ ] 9.1 Create `src/sentinel/routes/chat.py` — POST /chat
-- [ ] 9.2 Create `src/sentinel/routes/documents.py` — POST/GET/DELETE /documents
-- [ ] 9.3 Create `src/sentinel/routes/admin.py` — POST /admin/approve, GET /admin/usage, GET /admin/audit
-- [ ] 9.4 Update `src/sentinel/main.py` — register all route modules
-- [ ] 9.5 Add GET /health endpoint (no auth required)
+- [/] 9.1 Create `src/sentinel/routes/chat.py` — POST /chat
+- [/] 9.2 Create `src/sentinel/routes/documents.py` — POST/GET/DELETE /documents
+- [/] 9.3 Create `src/sentinel/routes/admin.py` — POST /admin/approve, GET /admin/usage, GET /admin/audit
+- [/] 9.4 Update `src/sentinel/main.py` — register all route modules
+- [/] 9.5 Add GET /health endpoint (no auth required)
 
 ### VERIFY Phase 9:
 ```bash
@@ -229,16 +229,16 @@ kill %1
 
 > **Goal:** End-to-end tests covering the full pipeline including multi-layer attack scenarios.
 
-- [ ] 10.1 Create `tests/test_pipeline_integration.py`:
-  - [ ] 10.1a Happy path — full chat request through all 12 layers
-  - [ ] 10.1b Multi-layer attack — injection passes Layer 1, caught by Layer 2
-  - [ ] 10.1c Cascading attack — 6 injections in 5 min triggers Layer 12
+- [x] 10.1 Create `tests/test_pipeline_integration.py`:
+  - [x] 10.1a Happy path — full chat request through all 12 layers
+  - [x] 10.1b Multi-layer attack — injection passes Layer 1, caught by Layer 2
+  - [x] 10.1c Cascading attack — 6 injections in 5 min triggers Layer 12
 
 ### VERIFY Phase 10:
 ```bash
 uv run pytest tests/ -v --tb=short
 ```
-- [ ] 10.V ALL tests pass (unit + integration)
+- [x] 10.V ALL tests pass (unit + integration)
 
 ---
 
@@ -294,6 +294,7 @@ grep -r "sk-" src/ --include="*.py" | grep -v "example" | grep -v ".env"
 | 2026-05-27 21:09 | gemini-3.5-flash | completed | Phase 4 | Completed Layers 1-4: Input Validator, Semantic Guard, System Prompt Hardener, and Input Restructurer. Configured list validation in config.py using Union types (str | list[str]) to prevent Pydantic JSON parsing errors from environment variables. |
 | 2026-05-27 22:30 | antigravity | started | Phase 5 | Resumed Phase 5: verified layers 5 & 6, starting implementation of Layer 7 (Context Isolator) and Layer 8 (Output Validator). |
 | 2026-05-27 22:45 | antigravity | completed | Phase 6 | Completed Phase 5 & Phase 6. Implemented Layer 7 (Context Isolator), Layer 8 (Output Validator), Layer 10 (Agent Identity), Layer 11 (Human Gate), Layer 12 (Threat Monitor), and wrote tests for all of them + Layer 9 (Audit Logger). Verified all 24 new/existing unit tests pass. |
+| 2026-05-27 23:05 | antigravity | completed | Phase 8 & 10 | Completed Phase 7, Phase 8, and Phase 10. Implemented RAG storage (store.py), retrieval (retrieval.py), ingestion with magic bytes & moderation guards (ingestion.py), and OpenAI wrapper with retry (llm_client.py). Wrote layers/__init__.py and wired all 12 layers in services/pipeline.py. Verified integration tests & all 55 tests pass. |
 | | | | | |
 
 ---
