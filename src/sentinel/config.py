@@ -159,6 +159,7 @@ class Settings(BaseSettings):
     # Layer 2 — Semantic Guard
     SEMANTIC_GUARD_THRESHOLD: float = Field(default=0.5, ge=0.0, le=1.0)
     SEMANTIC_GUARD_FAIL_CLOSED: bool = Field(default=True)
+    SEMANTIC_GUARD_TIMEOUT: float = Field(default=10.0, ge=1.0, le=60.0)
     SEMANTIC_GUARD_BANNED_TOPICS: str | list[str] = Field(
         default=["weapons manufacturing", "illegal drugs synthesis",
                  "exploit development", "malware creation"]

@@ -113,3 +113,33 @@ async def test_semantic_guard_fail_closed_execution_error(test_settings: Setting
         assert result.passed is False
         assert "failed closed" in result.reason
         assert "onnxruntime GPU OOM" in result.reason
+
+
+@pytest.mark.asyncio
+async def test_semantic_guard_timeout(test_settings: Settings) -> None:
+    """
+    Edge case: Verify that scanner execution timeout causes the layer to fail closed.
+    """
+    mock_slow = MagicMock()
+
+    def slow_scan(*args, **kwargs):
+        import time
+        time.sleep(2)
+        return ("sanitized", True, 0.0)
+
+    mock_slow.scan = slow_scan
+
+    mock_safe = MagicMock()
+    mock_safe.scan.return_value = ("sanitized", True, 0.0)
+
+    # Set custom timeout of 0.1s
+    test_settings.SEMANTIC_GUARD_TIMEOUT = 0.1
+    test_settings.SEMANTIC_GUARD_FAIL_CLOSED = True
+
+    with patch("llm_guard.input_scanners.PromptInjection", return_value=mock_slow), \
+         patch("llm_guard.input_scanners.Toxicity", return_value=mock_safe), \
+         patch("llm_guard.input_scanners.BanTopics", return_value=mock_safe):
+
+        result = await check_semantic_safety("Hello", test_settings)
+        assert result.passed is False
+        assert "timed out" in result.reason

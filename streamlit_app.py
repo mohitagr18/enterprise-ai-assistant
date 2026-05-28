@@ -29,11 +29,7 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Dark glassmorphic styling */
-    .stApp {
-        background-color: #0f111a;
-        color: #e2e8f0;
-    }
+    /* Custom components styling */
     .main-header {
         font-family: 'Outfit', 'Inter', sans-serif;
         background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
@@ -85,7 +81,7 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allowed_html=True,
+    unsafe_allow_html=True,
 )
 
 # Backend URL configuration
@@ -145,14 +141,14 @@ with st.sidebar:
             f'<div style="display: flex; align-items: center;"><span class="indicator"></span>'
             f'<span style="color:#10b981; font-weight:600;">FastAPI Online</span></div>'
             f'<div style="font-size:0.8rem; color:#94a3b8; margin-left:18px;">Uptime: {uptime_str} | v{health_info.get("version", "1.0.0")}</div>',
-            unsafe_allowed_html=True,
+            unsafe_allow_html=True,
         )
     else:
         st.markdown(
             '<div style="display: flex; align-items: center;"><span class="indicator indicator-offline"></span>'
             '<span style="color:#ef4444; font-weight:600;">FastAPI Offline</span></div>'
             '<div style="font-size:0.8rem; color:#94a3b8; margin-left:18px;">Start server: <code>uvicorn sentinel.main:app</code></div>',
-            unsafe_allowed_html=True,
+            unsafe_allow_html=True,
         )
 
     st.markdown("---")
@@ -165,7 +161,7 @@ with st.sidebar:
         st.markdown(
             f'**Clearance Role:** <span style="color:{role_color}; font-weight:bold; '
             f'text-transform: uppercase; font-size:0.9rem;">{st.session_state.role}</span>',
-            unsafe_allowed_html=True,
+            unsafe_allow_html=True,
         )
         st.markdown(f"**Session ID:** `{st.session_state.session_id}`")
         st.markdown(f"**Tokens Consumed:** `{st.session_state.tokens_consumed:,}`")
@@ -191,8 +187,8 @@ with st.sidebar:
 # LOGIN PAGE
 # =====================================================================
 if not st.session_state.token:
-    st.markdown('<h1 class="main-header">Sentinel AI</h1>', unsafe_allowed_html=True)
-    st.markdown('<p class="sub-header">Secure Enterprise AI Assistant & Security Gate</p>', unsafe_allowed_html=True)
+    st.markdown('<h1 class="main-header">Sentinel AI</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Secure Enterprise AI Assistant & Security Gate</p>', unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 1])
 
@@ -315,13 +311,13 @@ with tabs[0]:
                 
                 # Render layers metadata
                 if "layers_fired" in meta:
-                    st.markdown('<div style="margin-top: 8px;">', unsafe_allowed_html=True)
+                    st.markdown('<div style="margin-top: 8px;">', unsafe_allow_html=True)
                     for layer in meta["layers_fired"]:
                         st.markdown(
                             f'<span class="security-badge badge-pass">✓ {layer}</span>',
-                            unsafe_allowed_html=True,
+                            unsafe_allow_html=True,
                         )
-                    st.markdown("</div>", unsafe_allowed_html=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
                 
                 if "blocked_layer" in meta:
                     st.markdown(
@@ -329,7 +325,7 @@ with tabs[0]:
                         f'<span class="security-badge badge-block">🚫 {meta["blocked_layer"]}</span>'
                         f'<span class="security-badge badge-neutral">Code: {meta["error_code"]}</span>'
                         f'</div>',
-                        unsafe_allowed_html=True,
+                        unsafe_allow_html=True,
                     )
                 
                 # Render token/time stats
@@ -529,7 +525,7 @@ with tabs[1]:
                         color = color_map.get(doc["classification_level"], "gray")
                         st.markdown(
                             f'<span style="color:{color}; font-weight:bold;">{doc["classification_level"].upper()}</span>',
-                            unsafe_allowed_html=True,
+                            unsafe_allow_html=True,
                         )
                     with c_time:
                         st.write(doc.get("created_at") or "N/A")
@@ -773,7 +769,7 @@ if st.session_state.role == "admin":
                                     f'Input SHA-256 Hash: <code>{ev.get("request_hash")}</code><br>'
                                     f'Layers Blocked: <code>{json.dumps(blocked)}</code>'
                                     f'</div>',
-                                    unsafe_allowed_html=True,
+                                    unsafe_allow_html=True,
                                 )
                                 # Raw JSON
                                 st.json(ev)

@@ -102,6 +102,10 @@ semantic_guard_threshold = 0.5
 # true = fail closed (safe). false = fail open (dangerous). Always true in prod.
 semantic_guard_fail_closed = true
 
+# Maximum seconds allowed for semantic guard evaluation (both loading and scanning).
+# If exceeded, it will trigger a timeout exception and fail closed.
+semantic_guard_timeout = 10.0
+
 # Topics blocked regardless of phrasing. Matched by the semantic scanner.
 semantic_guard_banned_topics = [
   "weapons manufacturing",

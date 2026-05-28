@@ -25,13 +25,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Any) -> Response:
         response: Response = await call_next(request)
 
-        # 1. Content Security Policy (CSP) — strict defaults
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self'; "
-            "object-src 'none'; "
-            "frame-ancestors 'none';"
-        )
+        # 1. Content Security Policy (CSP) — strict defaults (relax only for documentation endpoints)
+        path = request.url.path
+        if path in ("/docs", "/redoc", "/openapi.json"):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self' https://cdn.jsdelivr.net; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "img-src 'self' data: https://fastapi.tiangolo.com; "
+                "frame-ancestors 'none';"
+            )
+        else:
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "object-src 'none'; "
+                "frame-ancestors 'none';"
+            )
 
         # 2. Prevent clickjacking (fallback for older browsers not supporting CSP frame-ancestors)
         response.headers["X-Frame-Options"] = "DENY"

@@ -58,7 +58,10 @@ async def validate_input(raw_input: str, settings: Settings) -> LayerResult:
                 return LayerResult(
                     layer_name=layer_name,
                     passed=False,
-                    reason=f"Injection pattern match: {pattern}",
+                    reason=(
+                        f"Request rejected: Injection pattern match detected ('{pattern}'). "
+                        "This input contains patterns associated with prompt manipulation or system overrides."
+                    ),
                 )
         except re.error:
             # Fall back to substring match if pattern is not valid regex syntax
@@ -66,7 +69,10 @@ async def validate_input(raw_input: str, settings: Settings) -> LayerResult:
                 return LayerResult(
                     layer_name=layer_name,
                     passed=False,
-                    reason=f"Injection pattern match: {pattern}",
+                    reason=(
+                        f"Request rejected: Injection pattern match detected ('{pattern}'). "
+                        "This input contains patterns associated with prompt manipulation or system overrides."
+                    ),
                 )
 
     return LayerResult(
