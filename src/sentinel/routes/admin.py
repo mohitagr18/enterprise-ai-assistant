@@ -159,6 +159,48 @@ async def approve_gated_action(
 
 
 @router.get(
+    "/approvals",
+    response_model=list[dict[str, Any]],
+    responses={
+        200: {"description": "List of pending gated action approvals."},
+        403: {"description": "Requires admin privileges."},
+    },
+)
+async def get_pending_approvals(
+    current_user: dict = Depends(get_current_user),
+    redis: aioredis.Redis = Depends(get_redis),
+) -> list[dict[str, Any]]:
+    """
+    Retrieve all pending gated approvals from Redis.
+    Requires admin privileges.
+    """
+    # Enforce Admin only
+    if current_user["role"] != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: Admin privileges required to view pending approvals.",
+        )
+
+    pending_tokens = []
+    # Scan for keys in Redis matching the approval token key structure
+    keys = await redis.keys("human_gate:token:*")
+    for key in keys:
+        val = await redis.get(key)
+        if val:
+            try:
+                payload = json.loads(val)
+                # Decode key name to extract token hex
+                token_id = key.split(":")[-1]
+                payload["token"] = token_id
+                payload["ttl"] = await redis.ttl(key)
+                pending_tokens.append(payload)
+            except Exception:
+                continue
+
+    return pending_tokens
+
+
+@router.get(
     "/usage",
     response_model=list[UsageResponse],
     responses={

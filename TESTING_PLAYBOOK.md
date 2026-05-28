@@ -249,12 +249,17 @@ curl -s -X POST http://127.0.0.1:8000/chat \
    ```
 3. **Expected Response:** Returns status code `403 Forbidden` with:
    ```json
-   {
-      "detail" : "Threat threshold breached: Temporary lockout active due to suspicious activity history...",
-      "error_code" : "THREAT_MONITOR_BLOCKED",
-      "session_id" : "..."
-   }
-   ```
+    {
+       "detail" : "Threat threshold breached: Temporary lockout active due to suspicious activity history...",
+       "error_code" : "THREAT_MONITOR_BLOCKED",
+       "session_id" : "..."
+    }
+    ```
+
+> [!NOTE]
+> **Rate Limiter and Threat Monitor Interaction:** 
+> When the **Threat Monitor** flags a user for too many policy violations (e.g., 3 injection blocks), it sets a lockout flag in Redis and immediately triggers a **rate limit reduction** (reducing standard users to only **5 requests per minute**).
+> Since you are sending requests rapidly to test the lockout, the **Rate Limiter middleware** (which runs before the pipeline) will block the 5th or 6th request with an **HTTP 429 (Too Many Requests)** before it can reach the Threat Monitor lockout check (which returns **HTTP 403**). Both results demonstrate the application's active defenses shielding the backend.
 
 ---
 
@@ -262,11 +267,95 @@ curl -s -X POST http://127.0.0.1:8000/chat \
 *Defends against: Cost abuse and rapid resource exhaustion.*
 
 To trigger this, you can adjust the daily token limits to a very low threshold (e.g. `5` tokens) inside the configuration:
-1. Open [config/defaults.toml](file:///Users/mohit/Documents/GitHub/enterprise-ai-assistant/config/defaults.toml#L134) and set:
-   ```toml
-   token_budget_standard = 5
-   ```
+1. Open [config/defaults.toml](file:///Users/mohit/Documents/GitHub/enterprise-ai-assistant/config/defaults.toml#L134) and set `token_budget_standard = 5`.
 2. Restart the FastAPI server.
 3. Submit any normal message (e.g., `"Hi there"`).
 4. **Expected Response:** Returns status code `400 Bad Request` with `TOKEN_BUDGET_EXHAUSTED` since the standard daily allocation has been exceeded.
 5. Revert `token_budget_standard` to `100000` after testing.
+
+---
+
+### Scenario F: Content Moderation Block (Layer 6)
+*Defends against: Harmful content (toxicity, violence, hate speech, self-harm).*
+
+#### 👤 How to test via Streamlit UI:
+1. Log in to the portal.
+2. In the chat console, type: `I hate all people and want to execute them all.`
+3. **Expected UI Result:** Displays a red warning card indicating a block by `content_moderator` (due to violence/harassment policy triggers).
+
+#### 📡 How to test via FastAPI REST API:
+Run the following curl command:
+```bash
+curl -s -X POST http://127.0.0.1:8000/chat \
+  -H "Authorization: Bearer <YOUR_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "I hate all people and want to execute them all.", "include_context": false}' | json_pp
+```
+* **Expected Response:** Returns status code `400 Bad Request` with:
+  ```json
+  {
+     "detail" : "Request rejected: Content blocked by safety policy (input). This input/output violates our community guidelines regarding safety and harmful activities.",
+     "error_code" : "CONTENT_MODERATION_BLOCKED",
+     "session_id" : "..."
+  }
+  ```
+
+---
+
+### Scenario G: Context Clearance Filtration (Layer 7)
+*Defends against: Indirect prompt injection and unauthorized RAG document access (privilege escalation).*
+
+#### 👤 How to test via Streamlit UI:
+1. Log in to the portal as `poweruser` (Password: `powerpass123`).
+2. Go to the **📚 Knowledge Base** tab and upload a text file. Select classification: **restricted**.
+3. Now log out, and log back in as `standarduser`.
+4. Ask the assistant to query that document's content (e.g., if you uploaded a file about restricted Q4 budgets, ask *"What is the Q4 budget?"*).
+5. **Expected UI Result:** The standard user will not receive information about the document. If you check the logs, **Layer 7 (Context Isolator)** filtered out the document before sending the prompt to the LLM because standard users lack `restricted` role clearance.
+
+---
+
+### Scenario H: Agent Identity Violation (Layer 10)
+*Defends against: The AI agent performing actions outside its pre-approved capabilities list, even if requested by an admin.*
+
+To trigger this, you can remove `"internal_docs"` from the agent's pre-approved resource list:
+1. Open [config/defaults.toml](file:///Users/mohit/Documents/GitHub/enterprise-ai-assistant/config/defaults.toml#L189) and change `agent_allowed_sources`:
+   ```toml
+   agent_allowed_sources = [
+     "company_wiki",
+     "hr_policies",
+   ]
+   ```
+   *(We removed `"internal_docs"` from the list).*
+2. Restart the FastAPI server.
+3. Log in to Streamlit and ensure **Include Context (RAG Search)** is checked (which requests `"internal_docs"` source access). Submit any query.
+4. **Expected Response:** Blocked by **Layer 10 (Agent Identity)**, returning status code `403 Forbidden` with the error code `AGENT_IDENTITY_VIOLATION` (because the agent attempted to query a source it is not authorized to touch).
+5. Revert `agent_allowed_sources` to include `"internal_docs"` after testing.
+
+---
+
+### Scenario I: Output Traceback Hardening (Layer 8)
+*Defends against: Model output anomalies and leakage of raw backend database logs or error tracebacks to the user.*
+
+#### 📡 How to test via FastAPI REST API:
+If the LLM generates a response containing raw python traceback strings (e.g. if the backend database errors out or if a prompt bypass attempt leaks internal variables):
+* **Layer 8 (Output Validator)** intercepts the output.
+* Instead of returning the traceback string to the user, it intercepts it and replaces it with a generic, safe response: *"I apologize, but I encountered an internal error while processing the response."*.
+* You can verify this behavior directly in the unit tests by running:
+  ```bash
+  uv run pytest tests/test_output_validator.py -v
+  ```
+
+---
+
+### Scenario J: Unconditional Auditing (Layer 9)
+*Defends against: Compliance failures and lack of administrative audit trails.*
+
+Every single request you ran during the scenarios above—whether it succeeded, was blocked by a pattern, was rate-limited, or was intercepted for approval—was audited unconditionally:
+1. Log in to Streamlit as `admin`.
+2. Click the **🛡️ Admin Center** tab and select **📜 Audit Log Viewer**.
+3. You will see a chronological, searchable table listing all requests, user IDs, hashes, which security layers fired, and which layers blocked the request in real time.
+4. You can also view the raw JSONL audit trail directly on your filesystem:
+   ```bash
+   tail -n 20 logs/audit.jsonl
+   ```
+

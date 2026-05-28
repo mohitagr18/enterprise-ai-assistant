@@ -303,7 +303,10 @@ with tabs[0]:
         avatar = "👤" if role == "user" else "🛡️"
         
         with st.chat_message(role, avatar=avatar):
-            st.markdown(chat_item["content"])
+            if chat_item.get("metadata", {}).get("is_html", False):
+                st.markdown(chat_item["content"], unsafe_allow_html=True)
+            else:
+                st.markdown(chat_item["content"])
             
             # Show metadata if available (for assistant replies or blocks)
             if "metadata" in chat_item:
@@ -406,19 +409,22 @@ with tabs[0]:
                     if response.status_code == 202:
                         # Human gate pending
                         pending_card = (
-                            f"### ⏳ High-Stakes Action Intercepted\n"
-                            f"The model requested a gated operation: **{data.get('details', {}).get('action_category', 'unknown')}**.\n\n"
-                            f"This requires human-in-the-loop validation.\n\n"
-                            f"**Approval Token:** `{data.get('details', {}).get('approval_token', '')}`  \n"
-                            f"*(Log in as an Administrator to approve this token)*"
+                            f'<div style="background-color: rgba(217, 119, 6, 0.15); color: #fbbf24; border: 1px solid #d97706; padding: 16px; border-radius: 8px; margin-bottom: 12px; font-family: sans-serif;">'
+                            f'<h3 style="color: #fbbf24; margin-top: 0; font-family: sans-serif; font-size: 1.25rem;">⏳ High-Stakes Action Intercepted</h3>'
+                            f'The model requested a gated operation: <strong>{data.get("details", {}).get("action_category", "unknown")}</strong>.<br/><br/>'
+                            f'This requires human-in-the-loop validation.<br/><br/>'
+                            f'<strong>Approval Token:</strong> <code>{data.get("details", {}).get("approval_token", "")}</code><br/><br/>'
+                            f'<em>(Log in as an Administrator to approve this token)</em>'
+                            f'</div>'
                         )
-                        message_placeholder.markdown(pending_card)
+                        message_placeholder.markdown(pending_card, unsafe_allow_html=True)
                         st.session_state.chat_history.append({
                             "role": "assistant",
                             "content": pending_card,
                             "metadata": {
                                 "blocked_layer": blocked_layer,
                                 "error_code": err_code,
+                                "is_html": True,
                             },
                         })
                     else:
@@ -571,34 +577,16 @@ if st.session_state.role == "admin":
                 "it stores a pending token in Redis. Administrators must explicitly approve it here."
             )
 
-            # Discover and query pending tokens from Redis directly
+            # Query pending tokens from the backend API approvals endpoint
             pending_tokens = []
             try:
-                # Import settings and client
-                from sentinel.config import Settings
-                from sentinel.dependencies import get_settings
-                settings = get_settings()
-
-                if settings.REDIS_URL:
-                    redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
+                r = httpx.get(f"{BACKEND_URL}/admin/approvals", headers=headers, timeout=5.0)
+                if r.status_code == 200:
+                    pending_tokens = r.json()
                 else:
-                    import fakeredis.aioredis as fakeredis_aio
-                    redis_client = fakeredis_aio.FakeRedis(decode_responses=True)
-
-                # Scan keys
-                keys = run_async(redis_client.keys("human_gate:token:*"))
-                for key in keys:
-                    val = run_async(redis_client.get(key))
-                    if val:
-                        payload = json.loads(val)
-                        token_id = key.split(":")[-1]
-                        payload["token"] = token_id
-                        # Check TTL
-                        ttl = run_async(redis_client.ttl(key))
-                        payload["ttl"] = ttl
-                        pending_tokens.append(payload)
+                    st.error(f"Failed to fetch approvals from API: {r.json().get('detail', 'Unknown error')}")
             except Exception as e:
-                st.warning(f"Unable to read pending tokens from Redis client directly: {str(e)}")
+                st.warning(f"Unable to read pending tokens from API: {str(e)}")
 
             # Manual input fallback
             manual_token = st.text_input("Manually Approve Token ID")

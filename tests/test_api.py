@@ -255,6 +255,11 @@ async def test_admin_operation_endpoints(
     assert len(usage_list) > 0
     assert any(u["user_id"] == "standarduser" for u in usage_list)
 
+    # Verify GET /admin/approvals (empty at first)
+    r_app_list = await async_client.get("/admin/approvals", headers=headers)
+    assert r_app_list.status_code == 200
+    assert isinstance(r_app_list.json(), list)
+
     # 2. Verify GET /admin/audit
     r_audit = await async_client.get("/admin/audit", headers=headers)
     assert r_audit.status_code == 200

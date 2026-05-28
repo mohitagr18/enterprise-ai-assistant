@@ -359,7 +359,8 @@ class SecurityPipeline:
             # --------------------------------------------------------------
             # Layer 11 — Human Gate (intercept high-stakes actions)
             # --------------------------------------------------------------
-            action_category = self._detect_action_category(response_text)
+            # Detect gated action from either the user's input or the LLM's response
+            action_category = self._detect_action_category(request.message) or self._detect_action_category(response_text)
             gate_res = await check_human_gate(
                 action_category=action_category,
                 user_id=user_id,
