@@ -28,6 +28,10 @@ class ChatResponse(BaseModel):
         default_factory=list,
         description="The list of security layers that evaluated this request.",
     )
+    layer_results: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Detailed results and statistics from each security layer.",
+    )
     processing_time_ms: int = Field(
         ...,
         description="Processing time in milliseconds.",

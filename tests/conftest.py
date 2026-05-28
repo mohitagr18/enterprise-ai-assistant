@@ -26,6 +26,9 @@ def test_settings() -> Settings:
         CHROMADB_PERSIST_DIR="./data/test_chromadb",
         AUDIT_LOG_FILE="./logs/test_audit.jsonl",
         APP_DEBUG=True,
+        TOKEN_BUDGET_STANDARD=100000,
+        TOKEN_BUDGET_POWER_USER=500000,
+        TOKEN_BUDGET_ADMIN=1000000,
     )
 
 

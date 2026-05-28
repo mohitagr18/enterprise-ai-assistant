@@ -62,6 +62,7 @@ st.markdown(
         margin-bottom: 0.5rem;
     }
     .badge-pass { background-color: #065f46; color: #34d399; border: 1px solid #059669; }
+    .badge-pass-warn { background-color: #78350f; color: #fbbf24; border: 1px solid #d97706; }
     .badge-block { background-color: #7f1d1d; color: #f87171; border: 1px solid #dc2626; }
     .badge-neutral { background-color: #1e293b; color: #94a3b8; border: 1px solid #475569; }
     
@@ -315,9 +316,20 @@ with tabs[0]:
                 # Render layers metadata
                 if "layers_fired" in meta:
                     st.markdown('<div style="margin-top: 8px;">', unsafe_allow_html=True)
+                    layer_results = meta.get("layer_results", {})
                     for layer in meta["layers_fired"]:
+                        extra_info = ""
+                        badge_style = "badge-pass"
+                        
+                        if layer == "context_isolator" and layer in layer_results:
+                            res_details = layer_results[layer].get("details", {})
+                            filtered_count = res_details.get("filtered_count", 0)
+                            if filtered_count > 0:
+                                extra_info = f" (Filtered {filtered_count} restricted document(s) due to standard clearance)"
+                                badge_style = "badge-pass-warn"
+                                
                         st.markdown(
-                            f'<span class="security-badge badge-pass">✓ {layer}</span>',
+                            f'<span class="security-badge {badge_style}">✓ {layer}{extra_info}</span>',
                             unsafe_allow_html=True,
                         )
                     st.markdown("</div>", unsafe_allow_html=True)
@@ -374,6 +386,7 @@ with tabs[0]:
                     
                     metadata = {
                         "layers_fired": data.get("layers_fired", []),
+                        "layer_results": data.get("layer_results", {}),
                         "tokens_used": tokens,
                         "processing_time_ms": data.get("processing_time_ms", 0),
                     }

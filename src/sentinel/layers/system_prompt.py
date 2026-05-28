@@ -55,4 +55,12 @@ def build_hardened_prompt(
         prompt_parts.extend(context_documents)
         prompt_parts.append("</context>")
 
+    # 5. Output Format
+    prompt_parts.extend([
+        "\n=== OUTPUT FORMAT ===",
+        'You MUST respond ONLY with a valid JSON object matching this schema:',
+        '{"response": "your text response here"}',
+        'Do not include any other markdown formatting (like ```json ... ``` blocks), backticks, or conversational filler outside the JSON. All output must be parseable as a single JSON object.',
+    ])
+
     return "\n".join(prompt_parts)

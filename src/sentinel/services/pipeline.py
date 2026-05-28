@@ -272,6 +272,7 @@ class SecurityPipeline:
                     settings=self.settings,
                 )
                 layers_fired.append(context_res.layer_name)
+                current_layer_results.append(context_res)
                 if not context_res.passed:
                     layers_blocked[context_res.layer_name] = context_res.reason
                     return ErrorResponse(
@@ -304,6 +305,7 @@ class SecurityPipeline:
             # --------------------------------------------------------------
             out_val_res = await validate_output(raw_output, self.settings)
             layers_fired.append(out_val_res.layer_name)
+            current_layer_results.append(out_val_res)
             
             if not out_val_res.passed:
                 error_type = out_val_res.details.get("error_type")
@@ -325,6 +327,7 @@ class SecurityPipeline:
                     # Re-validate
                     out_val_res = await validate_output(raw_output_retry, self.settings)
                     layers_fired.append(f"{out_val_res.layer_name}_retry")
+                    current_layer_results.append(out_val_res)
 
             # If validation still failed (or blocked by traceback detection)
             if not out_val_res.passed:
@@ -348,6 +351,7 @@ class SecurityPipeline:
                 settings=self.settings,
             )
             layers_fired.append(f"{mod_out_res.layer_name}_output")
+            current_layer_results.append(mod_out_res)
             if not mod_out_res.passed:
                 layers_blocked[f"{mod_out_res.layer_name}_output"] = mod_out_res.reason
                 return ErrorResponse(
@@ -368,6 +372,7 @@ class SecurityPipeline:
                 settings=self.settings,
             )
             layers_fired.append(gate_res.layer_name)
+            current_layer_results.append(gate_res)
             if not gate_res.passed:
                 layers_blocked[gate_res.layer_name] = gate_res.reason
                 return ErrorResponse(
@@ -399,6 +404,18 @@ class SecurityPipeline:
 
             processing_time_ms = int((time.perf_counter() - start_time) * 1000)
 
+            # Gather all executed layer details
+            results_dict = {}
+            for res in current_layer_results:
+                key = res.layer_name
+                if key == "content_moderator" and res.details.get("direction") == "output":
+                    key = "content_moderator_output"
+                results_dict[key] = {
+                    "passed": res.passed,
+                    "reason": res.reason,
+                    "details": res.details,
+                }
+
             return ChatResponse(
                 response=response_text,
                 session_id=session_id,
@@ -407,6 +424,7 @@ class SecurityPipeline:
                     output=token_counts["output"],
                 ),
                 layers_fired=layers_fired,
+                layer_results=results_dict,
                 processing_time_ms=processing_time_ms,
             )
 

@@ -56,6 +56,8 @@ class Settings(BaseSettings):
         toml_file=str(_DEFAULTS_TOML),
         case_sensitive=False,
         extra="ignore",
+        alias_generator=lambda s: s.lower(),
+        populate_by_name=True,
     )
 
     @classmethod
@@ -170,9 +172,9 @@ class Settings(BaseSettings):
     TIKTOKEN_ENCODING: str = Field(default="o200k_base")
 
     # Layer 5 — Token Budget
-    TOKEN_BUDGET_STANDARD: int = Field(default=100_000, ge=1000)
-    TOKEN_BUDGET_POWER_USER: int = Field(default=500_000, ge=1000)
-    TOKEN_BUDGET_ADMIN: int = Field(default=1_000_000, ge=1000)
+    TOKEN_BUDGET_STANDARD: int = Field(default=100_000, ge=1)
+    TOKEN_BUDGET_POWER_USER: int = Field(default=500_000, ge=1)
+    TOKEN_BUDGET_ADMIN: int = Field(default=1_000_000, ge=1)
 
     # Layer 6 — Content Moderator
     MODERATION_MODEL: str = Field(default="omni-moderation-latest")
