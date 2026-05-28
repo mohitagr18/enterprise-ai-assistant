@@ -132,20 +132,20 @@ uv run pytest tests/test_input_validator.py tests/test_semantic_guard.py tests/t
 > **Goal:** Layers that interact with Redis and OpenAI Moderation API, plus the
 > context isolation and output validation layers.
 
-- [ ] 5.1 Create `src/sentinel/layers/token_budget.py` — Layer 5 (Redis-backed)
-- [ ] 5.2 Create `tests/test_token_budget.py` — happy path, exhausted budget, exact boundary
-- [ ] 5.3 Create `src/sentinel/layers/content_moderator.py` — Layer 6 (OpenAI Moderation)
-- [ ] 5.4 Create `tests/test_content_moderator.py` — happy path, hate speech flagged, API timeout fail-closed
-- [ ] 5.5 Create `src/sentinel/layers/context_isolator.py` — Layer 7
-- [ ] 5.6 Create `tests/test_context_isolator.py` — happy path, poisoned doc wrapped, restricted filtered
-- [ ] 5.7 Create `src/sentinel/layers/output_validator.py` — Layer 8
-- [ ] 5.8 Create `tests/test_output_validator.py` — happy path, traceback caught, retry on bad JSON
+- [x] 5.1 Create `src/sentinel/layers/token_budget.py` — Layer 5 (Redis-backed)
+- [x] 5.2 Create `tests/test_token_budget.py` — happy path, exhausted budget, exact boundary
+- [x] 5.3 Create `src/sentinel/layers/content_moderator.py` — Layer 6 (OpenAI Moderation)
+- [x] 5.4 Create `tests/test_content_moderator.py` — happy path, hate speech flagged, API timeout fail-closed
+- [x] 5.5 Create `src/sentinel/layers/context_isolator.py` — Layer 7
+- [x] 5.6 Create `tests/test_context_isolator.py` — happy path, poisoned doc wrapped, restricted filtered
+- [x] 5.7 Create `src/sentinel/layers/output_validator.py` — Layer 8
+- [x] 5.8 Create `tests/test_output_validator.py` — happy path, traceback caught, retry on bad JSON
 
 ### VERIFY Phase 5:
 ```bash
 uv run pytest tests/test_token_budget.py tests/test_content_moderator.py tests/test_context_isolator.py tests/test_output_validator.py -v
 ```
-- [ ] 5.V All tests pass
+- [x] 5.V All tests pass
 
 ---
 
@@ -154,19 +154,19 @@ uv run pytest tests/test_token_budget.py tests/test_content_moderator.py tests/t
 > **Goal:** The advanced enterprise layers: agent-level access control,
 > human-in-the-loop approval, and behavioral threat detection.
 
-- [ ] 6.1 Create `src/sentinel/layers/agent_identity.py` — Layer 10
-- [ ] 6.2 Create `tests/test_agent_identity.py` — happy path, admin exceeds scope, role exceeds ceiling
-- [ ] 6.3 Create `src/sentinel/layers/human_gate.py` — Layer 11 (Redis-backed approval tokens)
-- [ ] 6.4 Create `tests/test_human_gate.py` — happy path, data_deletion intercepted, expired token
-- [ ] 6.5 Create `src/sentinel/layers/threat_monitor.py` — Layer 12 (Redis-backed rolling window)
-- [ ] 6.6 Create `tests/test_threat_monitor.py` — happy path, threshold breach flagged, user isolation
-- [ ] 6.7 Create `tests/test_audit_logger.py` — happy path, SHA-256 hash present, unwritable path fallback
+- [x] 6.1 Create `src/sentinel/layers/agent_identity.py` — Layer 10
+- [x] 6.2 Create `tests/test_agent_identity.py` — happy path, admin exceeds scope, role exceeds ceiling
+- [x] 6.3 Create `src/sentinel/layers/human_gate.py` — Layer 11 (Redis-backed approval tokens)
+- [x] 6.4 Create `tests/test_human_gate.py` — happy path, data_deletion intercepted, expired token
+- [x] 6.5 Create `src/sentinel/layers/threat_monitor.py` — Layer 12 (Redis-backed rolling window)
+- [x] 6.6 Create `tests/test_threat_monitor.py` — happy path, threshold breach flagged, user isolation
+- [x] 6.7 Create `tests/test_audit_logger.py` — happy path, SHA-256 hash present, unwritable path fallback
 
 ### VERIFY Phase 6:
 ```bash
 uv run pytest tests/test_agent_identity.py tests/test_human_gate.py tests/test_threat_monitor.py tests/test_audit_logger.py -v
 ```
-- [ ] 6.V All tests pass
+- [x] 6.V All tests pass
 
 ---
 
@@ -174,10 +174,10 @@ uv run pytest tests/test_agent_identity.py tests/test_human_gate.py tests/test_t
 
 > **Goal:** Document ingestion with security checks and retrieval that feeds Layer 7.
 
-- [ ] 7.1 Create `src/sentinel/knowledge/store.py` — ChromaDB collection management
-- [ ] 7.2 Create `src/sentinel/knowledge/ingestion.py` — MIME validation, magic bytes, content mod
-- [ ] 7.3 Create `src/sentinel/knowledge/retrieval.py` — semantic search feeding context isolator
-- [ ] 7.4 Create `src/sentinel/services/llm_client.py` — async OpenAI wrapper with retry/timeout
+- [/] 7.1 Create `src/sentinel/knowledge/store.py` — ChromaDB collection management
+- [/] 7.2 Create `src/sentinel/knowledge/ingestion.py` — MIME validation, magic bytes, content mod
+- [/] 7.3 Create `src/sentinel/knowledge/retrieval.py` — semantic search feeding context isolator
+- [/] 7.4 Create `src/sentinel/services/llm_client.py` — async OpenAI wrapper with retry/timeout
 
 ### VERIFY Phase 7:
 ```bash
@@ -292,6 +292,8 @@ grep -r "sk-" src/ --include="*.py" | grep -v "example" | grep -v ".env"
 | 2026-05-27 20:39 | gemini-3.5-flash | completed | Phase 2 | Created LayerResult, structlog setup, requests/responses/auth models, audit_logger, conftest.py. Verified imports. |
 | 2026-05-27 20:41 | gemini-3.5-flash | completed | Phase 3 | Argon2id hashing, JWT handler, auth routes, sliding-window rate limiter, and security headers implemented. Fixed pytest-asyncio event-loop sharing and ZSET concurrency collisions. |
 | 2026-05-27 21:09 | gemini-3.5-flash | completed | Phase 4 | Completed Layers 1-4: Input Validator, Semantic Guard, System Prompt Hardener, and Input Restructurer. Configured list validation in config.py using Union types (str | list[str]) to prevent Pydantic JSON parsing errors from environment variables. |
+| 2026-05-27 22:30 | antigravity | started | Phase 5 | Resumed Phase 5: verified layers 5 & 6, starting implementation of Layer 7 (Context Isolator) and Layer 8 (Output Validator). |
+| 2026-05-27 22:45 | antigravity | completed | Phase 6 | Completed Phase 5 & Phase 6. Implemented Layer 7 (Context Isolator), Layer 8 (Output Validator), Layer 10 (Agent Identity), Layer 11 (Human Gate), Layer 12 (Threat Monitor), and wrote tests for all of them + Layer 9 (Audit Logger). Verified all 24 new/existing unit tests pass. |
 | | | | | |
 
 ---
