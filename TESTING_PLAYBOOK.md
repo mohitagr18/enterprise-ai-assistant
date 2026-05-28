@@ -80,11 +80,26 @@ To understand how Sentinel AI secures your enterprise copilot, imagine entering 
 ### 12. Layer 12 (Threat Monitor) — Central Security Operations Center (SOC)
 * **The Analogy:** The building's central control room monitoring security alarms. If you set off multiple alarms (e.g. 5 blocks in 5 minutes), the SOC deactivates your keycard entirely, locking you out of the facility.
 
----
-
 ## 🧪 Security Test Scenarios
 
-### Setup: Obtain an API Access Token
+### Setup: Start both servers
+Before testing the security layers, make sure both the backend and frontend servers are running:
+
+1. **Start the FastAPI Backend Server:**
+   ```bash
+   uv run uvicorn sentinel.main:app --port 8000
+   ```
+   *The API engine will boot up at `http://127.0.0.1:8000` (docs available at `/docs`).*
+
+2. **Start the Streamlit UI Companion Portal:**
+   ```bash
+   uv run streamlit run streamlit_app.py
+   ```
+   *This starts the dashboard client. Open `http://localhost:8501` in your browser to access it.*
+
+---
+
+### Step 1: Obtain an API Access Token
 To query the FastAPI REST API directly, you need a JWT access token. Run the following command to log in as a `standarduser`:
 
 ```bash
