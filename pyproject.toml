@@ -32,6 +32,8 @@ dependencies = [
     "structlog>=24.4",
     # Async HTTP client
     "httpx>=0.28",
+    # Streamlit for UI
+    "streamlit>=1.40",
 ]
 
 [project.optional-dependencies]

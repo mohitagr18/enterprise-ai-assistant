@@ -76,5 +76,33 @@ app.add_middleware(RateLimitingMiddleware)
 # 4. JWT Authentication (stateless token extraction and validation)
 app.add_middleware(JWTAuthenticationMiddleware)
 
+import time
+
+# Record application startup time
+app.state.start_time = time.time()
+
 # Register routes
 app.include_router(auth_router)
+
+# Import other routers
+from sentinel.routes.chat import router as chat_router
+from sentinel.routes.documents import router as documents_router
+from sentinel.routes.admin import router as admin_router
+
+app.include_router(chat_router)
+app.include_router(documents_router)
+app.include_router(admin_router)
+
+
+@app.get("/health", tags=["Health"])
+async def health() -> dict[str, Any]:
+    """
+    Public health check endpoint displaying status, version and uptime stats.
+    """
+    uptime = time.time() - app.state.start_time
+    return {
+        "status": "healthy",
+        "version": "1.0.0",
+        "uptime_seconds": round(uptime, 2),
+    }
+
