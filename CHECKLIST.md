@@ -245,17 +245,17 @@ uv run pytest tests/ -v --tb=short
 
 > **Goal:** Complete documentation so a book reader can clone, run, and understand.
 
-- [ ] 11.1 Write `README.md`:
-  - [ ] 11.1a Project overview and prerequisites
-  - [ ] 11.1b Setup instructions (uv commands only, no Docker)
-  - [ ] 11.1c How to run locally (with and without Redis)
-  - [ ] 11.1d How to run tests
-  - [ ] 11.1e Description of all 12 security layers
-  - [ ] 11.1f API endpoint reference
-  - [ ] 11.1g "Attack Scenarios" section with example curl commands
+- [x] 11.1 Write `README.md`:
+  - [x] 11.1a Project overview and prerequisites
+  - [x] 11.1b Setup instructions (uv commands only, no Docker)
+  - [x] 11.1c How to run locally (with and without Redis)
+  - [x] 11.1d How to run tests
+  - [x] 11.1e Description of all 12 security layers
+  - [x] 11.1f API endpoint reference
+  - [x] 11.1g "Attack Scenarios" section with example curl commands
 
 ### VERIFY Phase 11:
-- [ ] 11.V README reviewed, all commands tested
+- [x] 11.V README reviewed, all commands tested
 
 ---
 
@@ -271,9 +271,9 @@ uv run uvicorn sentinel.main:app --host 127.0.0.1 --port 8000
 # Verify no hardcoded secrets
 grep -r "sk-" src/ --include="*.py" | grep -v "example" | grep -v ".env"
 ```
-- [ ] F.1 All tests pass
-- [ ] F.2 App starts cleanly
-- [ ] F.3 No hardcoded secrets in source code
+- [x] F.1 All tests pass
+- [x] F.2 App starts cleanly
+- [x] F.3 No hardcoded secrets in source code
 
 ---
 
