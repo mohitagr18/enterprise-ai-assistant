@@ -12,6 +12,7 @@ Every message submitted via the Chat console or the `/chat` API endpoint passes 
 * **Unconditional Auditing:** Regardless of whether the request succeeds or is blocked, the lifecycle always exits through Layer 9 (Audit Logger) to write a tamper-evident event to `audit.jsonl`.
 
 ### Diagram
+
 ```mermaid
 graph TD
     Client["Client Request (UI/API)"] --> Auth["JWT Auth & Rate Limiter"]
