@@ -6,6 +6,19 @@ Every security layer is structured as an isolated, asynchronous module with a si
 
 ---
 
+## 📖 Academic Paper & Reviewer Guide
+
+This repository contains the companion code and empirical evaluation data for the paper *“Building Safe Agentic AI in Enterprise”*. 
+
+To help reviewers quickly verify our findings and navigate the repository, we have prepared a central research package:
+
+*   **[Research Index & Table of Contents](research/README.md):** The primary entry point linking the formal threat model, baseline comparisons, and related work.
+*   **[Reviewer-Facing Summary Tables](research/evidence_package/summary_tables.md):** Consolidated baseline-vs-protected comparison tables and attack-family results.
+*   **[Evaluation Reproducibility Guide](research/reproducibility.md):** Step-by-step instructions to run the evaluations locally and regenerate all table metrics.
+*   **[Related Work & Literature Positioning](research/threat_model/related_work.md):** A detailed review of how Sentinel AI's layered security architecture differs from single-control gateways and standalone filters.
+
+---
+
 ## 🗺️ Visual Architecture & Workflows
 
 To simplify the explanation of how requests flow, how RAG document security clearance is evaluated, how lockouts trigger, and how gated actions are approved by administrators, see the detailed diagrams:

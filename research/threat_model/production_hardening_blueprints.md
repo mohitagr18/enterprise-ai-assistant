@@ -126,7 +126,7 @@ Convert the gateway into a fully air-gapped system by bundling verified model we
 ## 3. Cryptographic Audit Chain & SIEM Streaming (Layer 9)
 
 ### The Threat
-Local audit logs ([audit.jsonl](file:///Users/mohit/Documents/GitHub/enterprise-ai-assistant/logs/test_audit.jsonl)) are vulnerable to tampering, deletion, or modifications by attackers who gain write access to the host server container, leaving no trace for forensic investigations.
+Local audit logs ([audit.jsonl](../../logs/test_audit.jsonl)) are vulnerable to tampering, deletion, or modifications by attackers who gain write access to the host server container, leaving no trace for forensic investigations.
 
 ### The Mitigation Architecture
 Protect the audit trail by establishing a cryptographic hash chain for all log entries, and streaming them immediately to an external, write-once-read-many (WORM) security information and event management (SIEM) target.
