@@ -120,44 +120,26 @@ reaching Layer 4, a *stricter* outcome than predicted.
 
 This work makes the following contributions:
 
-**C1 — Layered architecture with verified fail-closed behavior:**  
-We present a 12-layer sequential security pipeline for enterprise LLM assistants where 10 of 12
-layers explicitly fail closed on infrastructure errors or unexpected exceptions. The fail-closed
-disposition is verified via unit tests for each layer. This contrasts with common single-guard
-approaches where a scanner failure silently allows requests through.
+**C1 — Layered security architecture with verified fail-closed pipeline behavior:**  
+We present a 12-layer fail-closed pipeline representing a layered security architecture for enterprise LLM assistants where 10 of 12 layers explicitly fail closed on infrastructure errors or unexpected exceptions. This establishes runtime trust by ensuring that no unvalidated user inputs reach the core model.
 
 **C2 — Defense-in-depth with measurable redundancy:**  
-Multiple attack categories are addressed by *more than one independent layer*, creating genuine
-defense-in-depth rather than nominal multi-layer labeling. Prompt injection, for example, is
-addressed by regex matching (L1), ML-based semantic scanning (L2), and system prompt hardening (L3) —
-three independent controls, any one of which is sufficient to block a known attack variant.
+Multiple attack categories are addressed by *more than one independent layer*, creating genuine defense-in-depth rather than nominal multi-layer labeling. Prompt injection, for example, is addressed by regex matching (L1), ML-based semantic scanning (L2), and system prompt hardening (L3) — three independent controls, any one of which is sufficient to block a known attack variant.
 
-**C3 — Human-in-the-Loop gate with cryptographic accountability:**  
-A stateful Human Gate (Layer 11) intercepts five categories of enterprise-critical actions
-(data deletion, policy change, financial approval, access grant, system configuration) before they
-reach the LLM response path. Actions are paused with a cryptographic approval token stored in
-Redis with a TTL, requiring a second authenticated admin call to proceed. The gate fires on
-*either* the user's input message *or* the LLM's output — it cannot be bypassed by encoding the
-action only in the model's response.
+**C3 — Human approval gate with cryptographic accountability:**  
+A stateful human approval gate (Layer 11) intercepts five categories of enterprise-critical actions (data deletion, policy change, financial approval, access grant, system configuration) before they reach the LLM response path. Actions are paused with a cryptographic approval token stored in Redis with a TTL, requiring a second authenticated admin call to proceed. The human gate fires on *either* the user's input message *or* the LLM's output — it cannot be bypassed by encoding the action only in the model's response.
 
 **C4 — Behavioral lockout as cumulative attack detection:**  
-Layer 12 (Threat Monitor) tracks per-user block counts across all security layers in a Redis-backed
-rolling window. Unlike per-request rate limiting, the threat monitor accumulates evidence across
-*different* attack types: a user who mixes injection attempts, budget abuse, and content violations
-hits the lockout threshold faster than any individual type's sub-threshold alone. After lockout,
-even benign requests are blocked until the window expires — demonstrated empirically in BL-06.
+Layer 12 (Threat Monitor) tracks per-user block counts across all security layers in a Redis-backed rolling window. Unlike per-request rate limiting, the threat monitor accumulates evidence across *different* attack types: a user who mixes injection attempts, budget abuse, and content violations hits the lockout threshold faster than any individual type's sub-threshold alone. After lockout, even benign requests are blocked until the window expires — demonstrated empirically in BL-06.
 
 **C5 — Version-controlled policy as enterprise compliance artifact:**  
-Security policy is separated from deployment secrets. All policy parameters (injection patterns,
-token budgets, action categories, banned topics, rate limits) live in `config/defaults.toml`, which
-is committed to version control and code-reviewed as a PR. This makes every policy change auditable,
-attributable, and rollback-capable — a property that runtime configuration dashboards cannot provide.
+Security policy is separated from deployment secrets. All policy parameters (injection patterns, token budgets, action categories, banned topics, rate limits) live in `config/defaults.toml`, which is committed to version control and code-reviewed as a PR. This makes every policy change auditable, attributable, and rollback-capable — a property that runtime configuration dashboards cannot provide.
 
-**C6 — GDPR-aware audit logging without raw data storage:**  
-The audit logger records the SHA-256 hash of input text rather than the raw input itself,
-satisfying GDPR data minimization while preserving the ability to detect identical repeated inputs
-via hash comparison. The logger is invoked in a `finally` block and cannot be bypassed by any
-upstream security layer failure.
+**C6 — Tamper-evident audit trail with GDPR compliance:**  
+The audit logger establishes a tamper-evident audit trail that records the SHA-256 hash of input text rather than the raw input itself, satisfying GDPR data minimization while preserving the ability to detect identical repeated inputs via hash comparison. The logger is invoked in a `finally` block and cannot be bypassed by any upstream security layer failure.
+
+**C7 — Robust evaluation framework:**  
+We demonstrate safety using a baseline comparison against an unprotected naive endpoint and an adversarial evaluation simulating 39 distinct attack payloads across 8 threat families.
 
 ---
 
