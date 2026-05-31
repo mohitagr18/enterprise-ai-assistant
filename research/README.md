@@ -29,9 +29,9 @@ Use this directory to navigate directly to the primary research materials and ve
     *   *Why it matters:* The reusable, structured test suite containing 39 payloads across 8 attack families.
 *   **[Reviewer Reproducibility Guide](reproducibility.md)**
     *   *Why it matters:* A single, step-by-step document explaining how to install packages and run scripts to reproduce every table in the paper.
-*   **[Key Numbers Cheat Sheet](evidence_package/key_numbers.md)**
+*   **[Key Numbers Cheat Sheet](evidence_package/evidence_package.md#key-numbers-cheat-sheet)**
     *   *Why it matters:* Provides a quick-reference list of all headline percentages, daily limits, rate thresholds, and model parameters for paper writing.
-*   **[Reviewer-Facing Summary Tables](evidence_package/summary_tables.md)**
+*   **[Reviewer-Facing Summary Tables](evidence_package/evidence_package.md#table-1-baseline-vs-protected-pipeline-summary)**
     *   *Why it matters:* Consolidates the two most important evaluation tables in a single location for instant reviewer verification.
 
 ---
