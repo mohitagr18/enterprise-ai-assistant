@@ -88,6 +88,63 @@ flowchart TD
 
 ---
 
+---
+## 2.1 - 12 layers broken
+
+### 2.1a – Request Validation Layers:
+```
+flowchart TD
+    Start([Client Request · JWT Authenticated])
+    Start --> Auth[JWT Auth & Rate Limiting]
+    Auth --> L1{L1: Input Validator\nRegex Check}
+    L1 -- Block --> BLK([BLOCKED · Error + Audit])
+    L1 -- Pass --> L2{L2: Semantic Guard\nML / Topic Block}
+    L2 -- Block --> BLK
+    L2 -- Pass --> L4[L4: Input Restructurer\nTruncate > 4096 tokens]
+    L4 --> L5{L5: Token Budget\nDaily Limit Check}
+    L5 -- Block --> BLK
+    L5 -- Pass --> End([Input Validated · Token Budget Confirmed])
+```
+
+### 2.1b – Request Validation Layers:
+```
+flowchart TD
+    Start([Input Validated · Token Budget Confirmed])
+    Start --> L10{L10: Agent Identity\nScope Verification}
+    L10 -- Block --> BLK([BLOCKED · Error + Audit])
+    L10 -- Pass --> L6{L6: Content Moderator\nModeration API — Input}
+    L6 -- Block --> BLK
+    L6 -- Pass --> L12{L12: Threat Monitor\nBlock Threshold}
+    L12 -- Lockout --> BLK
+    L12 -- Pass --> RAG{Include RAG Context?}
+    RAG -- Yes --> L7[L7: Context Isolator\nFilter & Wrap Docs]
+    L7 --> L3[L3: System Prompt\nBuild Hardened Prompt]
+    RAG -- No --> L3
+    L3 --> End([Hardened Prompt · Ready for LLM Inference])
+```
+
+### 2.1c – Output Pipeline:
+```
+flowchart TD
+    Start([Hardened Prompt · Ready for LLM Inference])
+    Start --> Exec[★ OpenAI LLM Execution]
+    Exec --> L8{L8: Output Validator\nTraceback & JSON Schema}
+    L8 -- Fail/JSON Error --> Retry[Retry Once\nwith Format Reminder]
+    Retry --> L8
+    L8 -- Fail/Block --> ErrResp[Return Error Response]
+    L8 -- Pass --> L6_out{L6: Content Moderator\nModeration API — Output}
+    L6_out -- Block --> ErrResp
+    L6_out -- Pass --> L11{L11: Human Gate\nHigh-Stakes Keyword Check}
+    L11 -- Action Gated --> Pending[Return 202 Accepted\nPending Approval Token]
+    L11 -- Pass --> Budget[Increment Daily Token Usage]
+    Budget --> Success[Return 200 OK Response]
+    ErrResp --> L9[L9: Audit Logger\nUnconditional Log]
+    Pending --> L9
+    Success --> L9
+    L9 --> End([Request Complete · Audit Record Written])
+```
+---
+
 ## 3. Gated Action Approvals (Human Gate)
 
 ### Description
