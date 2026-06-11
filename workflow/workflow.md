@@ -92,7 +92,7 @@ flowchart TD
 ## 2.1 - 12 layers broken
 
 ### 2.1a – Request Validation Layers:
-```
+```mermaid
 flowchart TD
     Start([Client Request · JWT Authenticated])
     Start --> Auth[JWT Auth & Rate Limiting]
@@ -107,7 +107,7 @@ flowchart TD
 ```
 
 ### 2.1b – Request Validation Layers:
-```
+```mermaid
 flowchart TD
     Start([Input Validated · Token Budget Confirmed])
     Start --> L10{L10: Agent Identity\nScope Verification}
@@ -124,7 +124,7 @@ flowchart TD
 ```
 
 ### 2.1c – Output Pipeline:
-```
+```mermaid
 flowchart TD
     Start([Hardened Prompt · Ready for LLM Inference])
     Start --> Exec[★ OpenAI LLM Execution]
