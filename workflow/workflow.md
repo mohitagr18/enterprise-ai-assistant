@@ -221,7 +221,7 @@ RAG is the primary target for indirect prompt injection (e.g. a document contain
 ### Diagram
 ```mermaid
 graph LR
-    subgraph Ingestion Pipeline (Write)
+    subgraph Ingestion Pipeline Write
         Doc[File Upload] --> Magic{Magic Bytes MIME Check}
         Magic -->|Invalid| Reject[400 Bad Request]
         Magic -->|Valid| Mod[Content Moderation]
@@ -230,7 +230,7 @@ graph LR
         Embedding --> ChromaDB[(ChromaDB Collection)]
     end
 
-    subgraph Retrieval Boundary (Read)
+    subgraph Retrieval Boundary Read
         User[Query: standarduser] --> Search[Semantic Vector Search]
         ChromaDB --> Search
         Search --> RawResults[Retrieved Documents]
